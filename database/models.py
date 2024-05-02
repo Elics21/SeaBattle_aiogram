@@ -22,7 +22,9 @@ class Game(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     tg_id = mapped_column(BigInteger)
     is_in_game: Mapped[bool] = mapped_column(Boolean)
-    plaer_field: Mapped[str] = mapped_column(String)
+    player_field: Mapped[str] = mapped_column(String)
+    player_ships: Mapped[str] = mapped_column(String)
+    bot_field: Mapped[str] = mapped_column(String)
 
 async def  async_main():
     async with engine.begin() as conn:

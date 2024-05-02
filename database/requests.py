@@ -1,7 +1,8 @@
 from database.models import async_session
 from database.models import User, Game
-from sqlalchemy import select
-from services.to_json import matrix_to_json
+from sqlalchemy import select, update
+from services.convector import matrix_to_json
+from services.generator import generate_bot_field
 
 
 async def set_user(tg_id, user_name: str, name: str):
@@ -13,14 +14,30 @@ async def set_user(tg_id, user_name: str, name: str):
             await session.commit()
 
 
-async def set_game(tg_id, plaer_field: list[list[int]]) -> bool:
+async def set_game(tg_id, player_field: list[list[int]], player_ships: list[list[int]]) -> bool:
     async with async_session() as session:
         game = await session.scalar(select(Game).where(Game.tg_id == tg_id))
-        plaer_field_json = matrix_to_json(plaer_field)
+        bot_field_json = matrix_to_json(generate_bot_field())
+        player_field_json = matrix_to_json(player_field)
+        player_ships_json = matrix_to_json(player_ships)
         if not game:
-            game = Game(tg_id=tg_id, is_in_game=True, plaer_field=plaer_field_json)
+            game = Game(tg_id=tg_id,
+                        is_in_game=True,
+                        player_field=player_field_json,
+                        player_ships=player_ships_json,
+                        bot_field=bot_field_json)
             session.add(game)
             await session.commit()
             return True
         else:
             return False
+
+async def set_player_field(tg_id, player_field: list[list[int]]):
+    async with async_session() as session:
+        player_field_json = matrix_to_json(player_field)
+        await session.execute(update(Game).where(Game.tg_id == tg_id).values(player_field = player_field_json))
+        await session.commit()
+
+async def get_game(tg_id):
+    async with async_session() as session:
+        return await session.scalar(select(Game).where(Game.tg_id == tg_id))
