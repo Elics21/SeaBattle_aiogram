@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, String
+from sqlalchemy import BigInteger, String, Boolean
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.ext.asyncio import AsyncAttrs, async_sessionmaker, create_async_engine
 
@@ -15,6 +15,14 @@ class User(Base):
     tg_id = mapped_column(BigInteger)
     user_name: Mapped[str] = mapped_column(String)
     name: Mapped[str] = mapped_column(String)
+
+class Game(Base):
+    __tablename__ = "games"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tg_id = mapped_column(BigInteger)
+    is_in_game: Mapped[bool] = mapped_column(Boolean)
+    plaer_field: Mapped[str] = mapped_column(String)
 
 async def  async_main():
     async with engine.begin() as conn:
